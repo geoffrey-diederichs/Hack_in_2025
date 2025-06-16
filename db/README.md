@@ -244,7 +244,7 @@ remove(b"1")
 add_entry_error(b"1", b"10000")
 ```
 
-`add_entry`, `remove`, `add_entry_error` and `view` being the functions I wrote to manipulate the program. If you want to check them out, you can see them in [this final script](./solve.py).
+`add_entry`, `remove`, `add_entry_error` and `view` being the functions I wrote to manipulate the program. If you want to check them out, you can see them in [this final script](./Sources/solve.py).
 
 Once we've set up the two previous notes, if we write 56 bytes over the first note's data we write over the second note's data pointer as you can see here :
 
