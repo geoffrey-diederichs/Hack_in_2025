@@ -1,0 +1,10 @@
+services:
+  pwn_note:
+    build:
+      context: .
+    ports:
+      - 31337:8000
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - FLAG=HNx04{F4k3_fl4g_f0r_73st1ng}
