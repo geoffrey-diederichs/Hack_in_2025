@@ -1,6 +1,6 @@
 # Note
 
-We were given [this binary](./Sources/note) and these files to run it :
+We were given [this binary](./Sources/note) and theses files to run it :
 
  - [Dockerfile](./Sources/Dockerfile)
  - [docker-compose.yml](./Sources/docker-compose.yml)
@@ -8,7 +8,7 @@ We were given [this binary](./Sources/note) and these files to run it :
 
 First things first, we can just run this container and get it's [libc](./Sources/libc.so.6) and [ld](./Sources/ld-linux-x86-64.so.2). After running `pwninit` we get our [patched binary](./Sources/note_patched) using the same libraries as the server.
 
-We can also see that most of the securities are enabled on that binary:
+We can also see that most of the securities are enabled on that binary :
 
 ```console
 $ checksec --file=./note
@@ -51,7 +51,7 @@ void add(void)
 }
 ```
 
-`getn()` is only using `scanf` to get an integer, and since there's no check on wheter `user_choice` is negative, there is an interger underflow in this line:
+`getn()` is only using `scanf` to get an integer, and since there's no check on wheter `user_choice` is negative, there is an interger underflow in this line :
 
 ```C
 if (0x10 < (int)user_choice) {
@@ -77,7 +77,7 @@ value:
 
 ![underflow example](./Images/underflow_example.png)
 
-Since the binary has Partial RELRO, the got is writable. So this vulnerability immediatly SCREAMS got overwrite. If you don't know what the fuck I'm talking about, [this](https://ir0nstone.gitbook.io/notes/binexp/stack/aslr/plt_and_got) might help you out.
+Since the binary has Partial RELRO, the got is writable, this vulnerability immediatly SCREAMS got overwrite. If you don't know what the fuck I'm talking about, [this](https://ir0nstone.gitbook.io/notes/binexp/stack/aslr/plt_and_got) might help you out.
 
 Our problem being, pie and aslr are activated. So if we want to overwrite the got with a one gadget we first need a leak to calculate it's address. I didn't find another vulnerability to get a leak, so at first I thought about bruteforcing which sadly couldn't work. Since I can overwrite the got, maybe if I overwrite some other function's got with `puts` it might leak me something. It didn't 🗿
 
@@ -91,15 +91,15 @@ But later on, reinvigorated by a quick flag, I decided to take another look at i
 puts(notes + (ulong)index * 0x10);
 ```
 
-We can write over `notes`, so if `puts` actually calls `printf` this gets us a format string.
+We can write whatever we want over `notes`, so if `puts` actually calls `printf` this gets us a format string.
 
 ![revelation](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjB6N3FxMDM0NWp5b3BtMWI2NDByYzdramFkaHE0ZTloaDg1dGFlNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26ufdipQqU2lhNA4g/giphy.gif)
 
-First thing first, let's check wheter it's feasable using GDB:
+First thing first, let's check wheter it's feasable using GDB :
 
 ![got overwrite](./Images/got_plt_values.png)
 
-Since `puts`'s address isn't resolved until we call it in `view()`, it doesn't point to the libc yet. And as we can see above, we only have to overwrite the least significant byte to `0xf0` to make it point to `printf`'s plt. Let's make it happen with a script:
+Since `puts`'s address isn't resolved until we call it in `view()`, it doesn't point to the libc yet. And as we can see above, we only have to overwrite the least significant byte to `0xf0` to make it point to `printf`'s plt. Let's make it happen with a script :
 
 ```python
 def add(index:bytes, value:bytes):
@@ -119,7 +119,7 @@ def view(index:bytes):
     return data
 ```
 
-First we can code these functions to interact with the program, and now we can overwite `puts` got quite simply this way:
+First we can code these functions to interact with the program , and now we can overwite `puts`'s got quite simply this way :
 
 ```python
 add(b"-10", b"\xf0")
@@ -179,7 +179,7 @@ one_gadget = p64(libc.address + 0xef52b)
 add(b"-7", b"A"*8+one_gadget[:7])
 ```
 
-Putting it all together in [this script](./solve.py) we get the flag:
+Putting it all together in [this script](./solve.py) we get the flag :
 
 ```console
 $ ./solve.py -r 146.148.28.103 32866
