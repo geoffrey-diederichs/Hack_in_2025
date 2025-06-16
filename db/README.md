@@ -1,4 +1,4 @@
-# Pwn db
+# db
 
 Again on top of [the binary](./Sources/db) we were given these files to run it :
 
