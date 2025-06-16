@@ -365,7 +365,7 @@ write(p64(environ-352), payload)
 p.interactive()
 ```
 
-And we get a shell :
+And we get a shell using [this final script](./Sources/solve.py) :
 
 ```console
 $ docker build . -t pwn-db
