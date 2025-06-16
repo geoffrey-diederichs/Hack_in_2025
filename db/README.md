@@ -1,12 +1,12 @@
 # Pwn db
 
-Again on top of [the binary](./db) we were given these files to run it :
+Again on top of [the binary](./Sources/db) we were given these files to run it :
 
- - [Dockerfile](./Dockerfile)
- - [docker-compose.yml](./docker-compose.yml)
- - [docker-entrypoint.sh](./docker-entrypoint.sh)
+ - [Dockerfile](./Sources/Dockerfile)
+ - [docker-compose.yml](./Sources/docker-compose.yml)
+ - [docker-entrypoint.sh](./Sources/docker-entrypoint.sh)
 
-By running the container, we can get this [libc](./libc.so.6), this [ld](./ld-linux-x86-64.so.2). After running `pnwinit`, we get [this patched binary](./db_patched) using them.
+By running the container, we can get this [libc](./Sources/libc.so.6), this [ld](./Sources/ld-linux-x86-64.so.2). After running `pnwinit`, we get [this patched binary](./Sources/db_patched) using them.
 
 Again, pretty much everything is enabled :
 
@@ -25,7 +25,7 @@ $ checksec --file=./db
 
 Let's see what changed :
 
-![db](./db.png)
+![db](./Images/db.png)
 
 This time we can also edit and delete our notes.
 
@@ -116,7 +116,7 @@ data: AAAAAAAA
 > 
 ```
 
-![note structure](./note_struct.png)
+![note structure](./Images/note_struct.png)
 
 But if you paid attention to `add_entry()`, you might wonder what happens when an note with an incorrect size that doesn't pass this condition is created :
 
@@ -175,7 +175,7 @@ void edit_entry(void)
 
 No verifications, it just gets the pointer from the note at the given index, and tries to write over it. But since it wasn't initialized as we said earlier, it tries to write on a null pointer which results in a  segmentation fault :
 
-![read](./read.png)
+![read](./Images/read.png)
 
 So that's fun and all, but what the fuck does it get us ?
 
@@ -231,7 +231,7 @@ idx: 1
 data: 
 ```
 
-![read 2](./read_2.png)
+![read 2](./Images/read_2.png)
 
 As we can see above, it kept the pointer of the first note and we're now writing 1000 bytes over it's data pointer. This gets us both a use after free and some sort of an overflow.
 
@@ -248,9 +248,9 @@ add_entry_error(b"1", b"10000")
 
 Once we've set up the two previous notes, if we write 56 bytes over the first note's data we write over the second note's data pointer as you can see here :
 
-![before](./before.png)
+![before](./Images/before.png)
 
-![after](./after.png)
+![after](./Images/after.png)
 
 (The first note is at `0x55c9871e02a0`, the second at `0x55c9871e02e0`)
 
@@ -318,7 +318,7 @@ But there's still a major issue. We have our two primitives, we have a heap leak
 
 But don't worry, we only need to create a chunk with some metadata containing a pointer to the libc. Essentially right now our chunks are going to the Tcachebins :
 
-![tcache](./tcache.png)
+![tcache](./Images/tcache.png)
 
 Which metadata only contains pointer to the heap, but if we were to get a chunk in the unsorted bin, he'd have a pointer to the main arena : a pointer to the libc. To do so, we just need to fill up the Tcachebins for chunks of a size over 0x90. The Tcachebins can only contain 7 chunks, so we can get a chunk in the unsorted bin like that :
 
@@ -330,7 +330,7 @@ def unsorted_bin():
         remove(str(i+3).encode())
 ```
 
-![unsorted bin](./unsorted.png)
+![unsorted bin](./Images/unsorted.png)
 
 We have a pointer to the libc !
 
