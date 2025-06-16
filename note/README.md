@@ -1,12 +1,12 @@
 # Note
 
-We were given [this binary](./note) and these files to run it :
+We were given [this binary](./Sources/note) and these files to run it :
 
- - [Dockerfile](./Dockerfile)
- - [docker-compose.yml](./docker-compose.yml)
- - [docker-entrypoint.sh](./docker-entrypoint.sh)
+ - [Dockerfile](./Sources/Dockerfile)
+ - [docker-compose.yml](./Sources/docker-compose.yml)
+ - [docker-entrypoint.sh](./Sources/docker-entrypoint.sh)
 
-First things first, we can just run this container and get it's [libc](./libc.so.6) and [ld](./ld-linux-x86-64.so.2). After running `pwninit` we get our [patched binary](./note_patched) using the same libraries as the server.
+First things first, we can just run this container and get it's [libc](./Sources/libc.so.6) and [ld](./Sources/ld-linux-x86-64.so.2). After running `pwninit` we get our [patched binary](./Sources/note_patched) using the same libraries as the server.
 
 We can also see that most of the securities are enabled on that binary:
 
@@ -25,7 +25,7 @@ $ checksec --file=./note
 
 With this out of the way, let's check out what the program does :
 
-![note](./note.png)
+![note](./Images/note.png)
 
 We can add notes, view their contents, and exit. Looking at the pseudo C we get with Ghidra, we can see that these notes are written on the bss in this function :
 
@@ -75,7 +75,7 @@ idx: -10
 value: 
 ```
 
-![underflow example](./underflow_example.png)
+![underflow example](./Images/underflow_example.png)
 
 Since the binary has Partial RELRO, the got is writable. So this vulnerability immediatly SCREAMS got overwrite. If you don't know what the fuck I'm talking about, [this](https://ir0nstone.gitbook.io/notes/binexp/stack/aslr/plt_and_got) might help you out.
 
@@ -97,7 +97,7 @@ We can write over `notes`, so if `puts` actually calls `printf` this gets us a f
 
 First thing first, let's check wheter it's feasable using GDB:
 
-![got overwrite](./got_plt_values.png)
+![got overwrite](./Images/got_plt_values.png)
 
 Since `puts`'s address isn't resolved until we call it in `view()`, it doesn't point to the libc yet. And as we can see above, we only have to overwrite the least significant byte to `0xf0` to make it point to `printf`'s plt. Let's make it happen with a script:
 
