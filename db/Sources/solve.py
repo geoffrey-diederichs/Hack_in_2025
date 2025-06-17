@@ -56,7 +56,6 @@ def view(index:bytes):
     return data
 
 # Sets up arbitrary read and write
-# Creates an unsorted bin chunk
 # Returns the heap's base address
 def initialize():
     # Setting up the overflow
